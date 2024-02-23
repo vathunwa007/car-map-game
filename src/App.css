@@ -6,16 +6,3 @@ body {
   margin: 0;
   padding: 0;
 }
-
-#whell {
-  position: absolute;
-  width: 200px;
-  height: 200px;
-  background-image: url(https://korinvr.com/bin/drivingsimulatorgm/28/assets/steering.png);
-  -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
-  user-select: none;
-  z-index: 100;
-  right: 10px;
-  bottom: 20px;
-  transform: scale(1) rotate(0.0816967deg);
-}

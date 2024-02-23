@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { getMapsApiOptions, loadMapsApi } from "./jsm/load-maps-api";
 import ThreeJSOverlayView from "./lib/ThreeJSOverlayView";
 import { CatmullRomCurve3, Vector3 } from "three";
@@ -9,13 +9,20 @@ import { LineGeometry } from "three/examples/jsm/lines/LineGeometry.js";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import "./App.css";
+import Controler from "./components/controler/Controller";
+import { isHotkeyPressed } from "react-hotkeys-hook";
+import Player from "./class/Player";
+import MapLabel from "./lib/MapLabel";
+
 function App() {
   const CAR_FRONT = new Vector3(0, 1, 0);
   const tmpVec3 = new Vector3();
-
+  const maxSpeed = 100;
+  let speed = 0;
+  let carWhellRotate = 0;
   const VIEW_PARAMS = {
     center: { lat: 53.554486, lng: 10.007479 },
-    zoom: 18,
+    zoom: 21,
     heading: 40,
     tilt: 65,
   };
@@ -67,13 +74,12 @@ function App() {
         // "https://ubilabs.github.io/threejs-overlay-view/lowpoly-sedan.0f076009.glb",
         (gltf) => {
           const group = gltf.scene;
-          // console.log("group :>> ", group);
+          // console.log("group :>> ", group.getObjectByName("base_01"));
           const carModel = group.getObjectByName("Sketchfab_model") || group;
-          // console.log("carModel :>> ", carModel);
-          // carModel?.scale.setScalar(0.05);
-          carModel?.scale.setScalar(3);
+          // carModel?.scale.setScalar(0.5);
+          carModel?.scale.setScalar(1);
           carModel?.rotation.set(0, 0, Math.PI, "ZXY");
-          // carModel.rotation.set(Math.PI / 2, 0, Math.PI, "ZXY");
+          // carModel.rotation.set(Math.PI / 2, 0, Math.PI, "YXZ");
           resolve(group);
         }
       );
@@ -92,7 +98,8 @@ function App() {
         disableDefaultUI: true,
         backgroundColor: "transparent",
         gestureHandling: "greedy",
-        // mapTypeId: "satellite",
+        keyboardShortcuts: false,
+        mapTypeId: "satellite",
         ...VIEW_PARAMS,
       }
     );
@@ -104,21 +111,27 @@ function App() {
   useEffect(() => {
     (async () => {
       const map = await initMap();
+
       const overlay = new ThreeJSOverlayView(VIEW_PARAMS.center);
       overlay.setMap(map);
       const scene = overlay.getScene();
-      const points = ANIMATION_POINTS.map((p) => overlay.latLngAltToVector3(p));
-      const curve = new CatmullRomCurve3(points, true, "catmullrom", 0.2);
-      curve.updateArcLengths();
 
-      const trackLine = createTrackLine(curve);
-      scene.add(trackLine);
+      const UserPlayer = new Player("Aunwa", map);
+
+      const mapLabel = new MapLabel({
+        text: UserPlayer.name,
+        position: VIEW_PARAMS.center,
+        map: map,
+        fontSize: 20,
+        align: "top",
+      });
 
       let carModel: GLTF["scene"];
+
       loadCarModel().then((obj) => {
         carModel = obj as GLTF["scene"];
         scene.add(carModel);
-
+        UserPlayer.setCar(carModel);
         // since loading the car-model happened asynchronously, we need to
         // explicitly trigger a redraw.
         overlay.requestRedraw();
@@ -126,15 +139,84 @@ function App() {
 
       // the update-function will animate the car along the spline
       overlay.update = () => {
-        trackLine.material.resolution.copy(overlay.getViewportSize());
-
         if (!carModel) return;
+        const wheelFrontLeft = carModel?.getObjectByName("wheelBaseL_014");
+        const wheelFrontRight = carModel?.getObjectByName("wheelBaseR_017");
+        const wheelBack = carModel?.getObjectByName("wheels_013");
 
-        const animationProgress =
-          (performance.now() % ANIMATION_DURATION) / ANIMATION_DURATION;
-        curve.getPointAt(animationProgress, carModel.position);
-        curve.getTangentAt(animationProgress, tmpVec3);
-        carModel.quaternion.setFromUnitVectors(CAR_FRONT, tmpVec3);
+        // const animationProgress =
+        //   (performance.now() % ANIMATION_DURATION) / ANIMATION_DURATION;
+        // curve.getPointAt(animationProgress, carModel.position);
+        // curve.getTangentAt(animationProgress, tmpVec3);
+        // carModel.quaternion.setFromUnitVectors(CAR_FRONT, tmpVec3);
+        carModel.translateY((speed * 1) / maxSpeed); //เดินรถไปข้างหน้าตามความเร็ว
+        //เลี้ยวรถตอนเดินหน้ากับถอยหลัง
+        if (speed > 1) {
+          carModel.rotateZ((-carWhellRotate * 0.03) / 100);
+        } else if (speed < -1) {
+          carModel.rotateZ((carWhellRotate * 0.03) / 100);
+        }
+        //เดินหน้า
+        if (isHotkeyPressed("up")) {
+          if (speed < maxSpeed) speed += 1;
+
+          wheelFrontLeft?.rotateX(10);
+          wheelBack?.rotateX(10);
+          wheelFrontRight?.rotateX(10);
+        } else {
+          if (speed > 0) speed -= 0.5;
+        }
+        //ถอยหลัง
+        if (isHotkeyPressed("down")) {
+          if (speed > 0) {
+            speed -= 5;
+          } else {
+            speed -= 0.5;
+          }
+          // carModel.translateY(-0.1);
+          wheelFrontLeft?.rotateX(-10);
+          wheelBack?.rotateX(-10);
+          wheelFrontRight?.rotateX(-10);
+        } else {
+          if (speed < 0) speed += 0.5;
+        }
+
+        // if (isHotkeyPressed("left")) {
+        //   if (isHotkeyPressed("up")) {
+        //     // carModel.rotateZ((-carWhellRotate * 0.03) / 100);
+        //   }
+        // }
+        // if (isHotkeyPressed("right")) {
+        //   if (isHotkeyPressed("up")) {
+        //     // carModel.rotateZ((-carWhellRotate * 0.03) / 100);
+        //   }
+        // }
+
+        // หมุนล้อตามพวงมาลัย
+        wheelFrontLeft?.rotation.set(
+          0,
+          -(carWhellRotate * 0.3) / 100,
+          0,
+          "ZXY"
+        );
+        wheelFrontRight?.rotation.set(
+          0,
+          -(carWhellRotate * 0.3) / 100,
+          0,
+          "ZXY"
+        );
+        const coordinates = overlay.vector3ToLatLngAlt(carModel.position);
+        const zoomSpeed = Math.max(
+          20,
+          Math.min(21 - (speed / 100) * (21 - 20), 21)
+        );
+
+        map.moveCamera({
+          center: coordinates,
+          zoom: zoomSpeed,
+        });
+
+        mapLabel.setPosition(coordinates);
 
         overlay.requestRedraw();
       };
@@ -157,7 +239,7 @@ function App() {
           zIndex: 0,
         }}
       ></div>
-      <div id="whell" />
+      <Controler onWheelRotate={(e) => (carWhellRotate = e)} />
     </div>
   );
 }
