@@ -9,7 +9,7 @@ import { LineGeometry } from "three/examples/jsm/lines/LineGeometry.js";
 import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
 import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import "./App.css";
-import Controler from "./components/controler/Controller";
+import Controler from "./components/carSteering/CarSteering";
 import { isHotkeyPressed } from "react-hotkeys-hook";
 import Player from "./class/Player";
 function App() {

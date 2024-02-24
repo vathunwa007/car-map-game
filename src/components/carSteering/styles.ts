@@ -1,6 +1,6 @@
 import styled from "@emotion/styled";
 
-export const CarSteeringWheel = styled.div<{ rotateTions: number }>`
+export const CarSteeringWheel = styled.div`
   position: absolute;
   width: 200px;
   height: 200px;
@@ -11,5 +11,5 @@ export const CarSteeringWheel = styled.div<{ rotateTions: number }>`
   right: 60px;
   bottom: 60px;
   transition: 200ms linear all;
-  transform: scale(1) rotate(${({ rotateTions }) => rotateTions || 0}deg);
+  transform: scale(1) rotate(0deg);
 `;

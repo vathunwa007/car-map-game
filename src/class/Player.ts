@@ -1,25 +1,70 @@
-import { Group, Object3DEventMap } from "three";
+/* eslint-disable @typescript-eslint/no-unused-vars */
+import { Group, Object3DEventMap, Scene, Vector3 } from "three";
+import ThreeJSOverlayView from "../lib/ThreeJSOverlayView";
+import CarMuscle from "./CarMuscle";
+import MapLabel from "../lib/MapLabel";
 
 export default class Player {
   public id!: string;
   public name!: string;
-  public car?: Group<Object3DEventMap>;
+  public car?: CarMuscle;
   public map: google.maps.Map;
+  public overlay: ThreeJSOverlayView;
+  protected scene: Scene;
 
-  constructor(
-    name: string,
-    map: google.maps.Map,
-    car?: Group<Object3DEventMap>
-  ) {
+  constructor(name: string, map: google.maps.Map) {
     this.id = Math.floor(Math.random() * 10).toString();
     this.name = name || "Anonymous";
-    this.car = car;
     this.map = map;
+
+    const overlay = new ThreeJSOverlayView({
+      lat: map.getCenter()?.lat() || 1,
+      lng: map.getCenter()?.lng() || 1,
+    });
+    overlay.setMap(map);
+    this.overlay = overlay;
+    this.scene = overlay.getScene();
   }
 
-  setCar(car: Group<Object3DEventMap>) {
+  setCar(car: CarMuscle) {
     this.car = car;
   }
 
-  update() {}
+  async update(callbackLoop?: () => void) {
+    const mapLabel = new MapLabel({
+      text: this.name,
+      map: this.map,
+      fontSize: 20,
+      align: "top",
+    });
+    const CarUser = new CarMuscle();
+    const CarModel = await CarUser.loadModel();
+    CarUser.setCar(CarModel);
+    this.setCar(CarUser);
+
+    this.scene.add(CarModel);
+
+    this.overlay.requestRedraw();
+
+    this.overlay.update = () => {
+      callbackLoop?.();
+      if (!this.car?.carModel) return;
+      CarUser.update();
+
+      const coordinates = this.overlay.vector3ToLatLngAlt(
+        CarUser.carModel?.position || new Vector3()
+      );
+      const zoomSpeed = Math.max(
+        20,
+        Math.min(21 - (CarUser.speed / 100) * (21 - 20), 21)
+      );
+      mapLabel.setPosition(coordinates);
+      this.map.moveCamera({
+        center: coordinates,
+        zoom: zoomSpeed,
+      });
+
+      this.overlay.requestRedraw();
+    };
+  }
 }
