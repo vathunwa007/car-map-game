@@ -2,19 +2,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useState } from "react";
 import { getMapsApiOptions, loadMapsApi } from "./jsm/load-maps-api";
-import ThreeJSOverlayView from "./lib/ThreeJSOverlayView";
-import { CatmullRomCurve3, Vector3 } from "three";
-import { Line2 } from "three/examples/jsm/lines/Line2.js";
-import { LineGeometry } from "three/examples/jsm/lines/LineGeometry.js";
-import { LineMaterial } from "three/examples/jsm/lines/LineMaterial.js";
-import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import "./App.css";
-import CarSteering from "./components/carSteering/CarSteering";
-import { isHotkeyPressed } from "react-hotkeys-hook";
 import Player from "./class/Player";
-import MapLabel from "./lib/MapLabel";
-import Car_muscle from "./class/CarMuscle";
-import CarMuscle from "./class/CarMuscle";
 import Controller from "./class/Controller";
 
 function App() {
@@ -52,7 +41,6 @@ function App() {
       const map = await initMap();
 
       const UserPlayer = new Player("Aunwa", map);
-
       UserPlayer.update();
     })();
   }, [initMap]);
