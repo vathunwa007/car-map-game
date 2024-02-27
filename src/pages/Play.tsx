@@ -1,16 +1,13 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { getMapsApiOptions, loadMapsApi } from "../jsm/load-maps-api";
 import "./Play.css";
 import Player from "../class/Player";
 import Controller from "../class/Controller";
 import { Server, Socket, io } from "../server/sockets";
-import { Vector3 } from "three";
 
 function Play() {
-  const [IServer, setIServer] = useState<Server | undefined>(undefined);
-
   const VIEW_PARAMS = {
     center: { lat: 53.554486, lng: 10.007479 },
     zoom: 21,
@@ -28,7 +25,7 @@ function Play() {
       document.getElementById("map") as HTMLElement,
       {
         mapId: mapId,
-        disableDefaultUI: true,
+        // disableDefaultUI: true,
         backgroundColor: "transparent",
         gestureHandling: "greedy",
         keyboardShortcuts: false,
@@ -44,23 +41,7 @@ function Play() {
   useEffect(() => {
     (async () => {
       const map = await initMap();
-
-      // function convert_ToObject(classInstance: any) {
-      //   const entries = Object.entries(classInstance);
-
-      //   return Object.fromEntries(entries);
-      // }
-
-      // function mapToJSON(map: any) {
-      //   const obj = {};
-
-      //   map.forEach((value: any, key: any) => {
-      //     obj[key] = value;
-      //   });
-
-      //   return JSON.stringify(obj);
-      // }
-
+      const UserPlayer = new Player("Anonymouse", map, true);
       const clients = new Map<
         string,
         {
@@ -75,13 +56,17 @@ function Play() {
           position: v.player.car?.carModel.position,
           rotation: v.player.car?.carModel.rotation,
         }));
+        playerValues.push({
+          id: UserPlayer.name,
+          position: UserPlayer.car?.carModel.position,
+          rotation: UserPlayer.car?.carModel.rotation,
+        });
         return playerValues;
       };
 
       io()
         .then((socket) => {
-          const UserPlayer = new Player(socket.id, map, true);
-          UserPlayer.update();
+          UserPlayer.name = socket.id;
           console.log("socketClient :>> ", socket);
           socket.on("disconnect", () => {
             console.error("connection got interrupt");
@@ -90,13 +75,15 @@ function Play() {
             const player: Array<{ id: string; player: string }> =
               JSON.parse(py);
             player.forEach((player) => {
-              clients.set(socket.id, {
-                socket: socket,
-                player: new Player(player.player, map, false),
-              });
+              if (player.id !== UserPlayer.name) {
+                clients.set(player.id, {
+                  socket: socket,
+                  player: new Player(player.id, map, false),
+                });
+              }
             });
             Array.from(clients.values()).forEach((cli) => {
-              if (cli.player.id !== socket.id) {
+              if (cli.player.name !== UserPlayer.name) {
                 cli.player.update();
               }
             });
@@ -106,21 +93,20 @@ function Play() {
             const dataPlayer = data.filter(
               (player: any) => player.id !== socket.id
             );
-
-            dataPlayer.map((player: any) => {
+            dataPlayer.forEach((player: any) => {
               clients
-                .get(player.id)
+                .get(player?.id)
                 ?.player.car?.carModel.rotation.set(
-                  dataPlayer.rotation._x,
-                  dataPlayer.rotation._y,
-                  dataPlayer.rotation._z
+                  player.rotation._x,
+                  player.rotation._y,
+                  player.rotation._z
                 );
               clients
-                .get(player.id)
+                .get(player?.id)
                 ?.player.car?.carModel.position.set(
-                  dataPlayer.position.x,
-                  dataPlayer.position.y,
-                  dataPlayer.position.z
+                  player.position.x,
+                  player.position.y,
+                  player.position.z
                 );
             });
           });
@@ -137,7 +123,7 @@ function Play() {
               const Server = await serv;
               // setIServer(Server);
               console.log("Server :>> ", Server);
-              const UserPlayer = new Player(Server.code, map, true);
+              UserPlayer.name = Server.code;
               UserPlayer.update();
             },
             (socket, serv) => {
@@ -165,10 +151,6 @@ function Play() {
                 player: serv.code,
               });
               serv.emit("connectPlayer", JSON.stringify(newMap));
-
-              socket.on("connectPlayer", (lc) => {
-                console.log("connectPlayer", lc);
-              });
 
               socket.on("location", ({ position, rotation }) => {
                 clients
