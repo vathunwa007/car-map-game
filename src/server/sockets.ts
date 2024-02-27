@@ -14,7 +14,6 @@ export function io(uri?: string): Promise<Socket> {
     peer.on("open", (id) => {
       // Once the Peer connection is open, create a data connection.
       const dataConnection = peer.connect("1123123", { reliable: true });
-
       setTimeout(() => {
         reject("the server took too long to respond");
       }, 5000);
@@ -78,6 +77,11 @@ export class Socket {
     });
   }
 
+  public isOnline() {
+    return this.client.peerConnection.iceConnectionState === "disconnected"
+      ? false
+      : true;
+  }
   public on(event_name: string, handler: (args: any) => void): void;
   public on(event_name: "disconnect", handler: () => void): void;
 
@@ -107,7 +111,8 @@ export class Server {
   public whenCloseF: () => void;
   public emit: (event_name: string, args?: any) => void;
   constructor(
-    idf?: (thisobj: Server) => Promise<() => void> | undefined,
+    // idf?: (thisobj: Server) => Promise<() => void> | undefined,
+    idf?: (thisobj: Server) => void,
     onf?: (s: Socket, server: Server) => void
   ) {
     let error = true;

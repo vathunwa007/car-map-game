@@ -12,6 +12,7 @@ export default class Player {
   public overlay: ThreeJSOverlayView;
   protected scene: Scene;
   public isControl: boolean = false;
+  public label: MapLabel | undefined;
 
   constructor(name: string, map: google.maps.Map, main?: boolean) {
     this.id = Math.floor(Math.random() * 10).toString();
@@ -32,6 +33,12 @@ export default class Player {
     this.car = car;
   }
 
+  remove() {
+    const selectedObject = this.scene.getObjectByName(this.name);
+    if (selectedObject) this.scene.remove(selectedObject);
+    this.label?.onRemove();
+  }
+
   async update(callbackLoop?: () => void) {
     const mapLabel = new MapLabel({
       text: this.name,
@@ -39,10 +46,12 @@ export default class Player {
       fontSize: 20,
       align: "top",
     });
+    this.label = mapLabel;
     const CarUser = new CarMuscle(this.isControl);
     const CarModel = await CarUser.loadModel();
     CarUser.setCar(CarModel);
     this.setCar(CarUser);
+    CarModel.name = this.name;
 
     this.scene.add(CarModel);
 

@@ -118,13 +118,22 @@ function Play() {
           });
         })
         .catch(() => {
-          const server = new Server(
-            async (serv) => {
+          new Server(
+            async (serv: Server) => {
               const Server = await serv;
               // setIServer(Server);
               console.log("Server :>> ", Server);
               UserPlayer.name = Server.code;
               UserPlayer.update();
+
+              setInterval(() => {
+                Array.from(clients.values()).forEach((client) => {
+                  if (!client.socket.isOnline()) {
+                    client.player.remove();
+                    clients.delete(client.socket.id);
+                  }
+                });
+              }, 5000);
             },
             (socket, serv) => {
               clients.set(socket.id, {
@@ -169,8 +178,11 @@ function Play() {
                   );
                 serv.emit("update_location", getUpdate());
               });
-              // const a = convert_ToObject(UserPlayer);
-              // console.log("a :>> ", a.toString());
+
+              socket.on("disconnect", () => {
+                const sId = socket.id;
+                clients.delete(sId);
+              });
             }
           );
         });
