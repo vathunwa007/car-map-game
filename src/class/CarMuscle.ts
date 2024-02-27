@@ -13,16 +13,19 @@ class CarMuscle {
   public wheelFrontRight!: Object3D<Object3DEventMap> | undefined;
   public wheelBack!: Object3D<Object3DEventMap> | undefined;
   public ControllerCar!: Controller | undefined;
+  public isControl: boolean = false;
 
-  constructor() {}
+  constructor(main?: boolean) {
+    this.isControl = main || false;
+  }
 
   setCar(car: Group<Object3DEventMap>) {
     this.carModel = car;
-    this.ControllerCar = new Controller(this, car);
+    if (this.isControl) this.ControllerCar = new Controller(this, car);
   }
 
   update() {
-    this.ControllerCar?.update();
+    if (this.isControl) this.ControllerCar?.update();
   }
 
   loadModel(): Promise<Group<Object3DEventMap>> {

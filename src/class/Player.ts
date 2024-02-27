@@ -11,11 +11,13 @@ export default class Player {
   public map: google.maps.Map;
   public overlay: ThreeJSOverlayView;
   protected scene: Scene;
+  public isControl: boolean = false;
 
-  constructor(name: string, map: google.maps.Map) {
+  constructor(name: string, map: google.maps.Map, main?: boolean) {
     this.id = Math.floor(Math.random() * 10).toString();
     this.name = name || "Anonymous";
     this.map = map;
+    this.isControl = main || false;
 
     const overlay = new ThreeJSOverlayView({
       lat: map.getCenter()?.lat() || 1,
@@ -37,7 +39,7 @@ export default class Player {
       fontSize: 20,
       align: "top",
     });
-    const CarUser = new CarMuscle();
+    const CarUser = new CarMuscle(this.isControl);
     const CarModel = await CarUser.loadModel();
     CarUser.setCar(CarModel);
     this.setCar(CarUser);
@@ -59,10 +61,12 @@ export default class Player {
         Math.min(21 - (CarUser.speed / 100) * (21 - 20), 21)
       );
       mapLabel.setPosition(coordinates);
-      this.map.moveCamera({
-        center: coordinates,
-        zoom: zoomSpeed,
-      });
+      if (this.isControl) {
+        this.map.moveCamera({
+          center: coordinates,
+          zoom: zoomSpeed,
+        });
+      }
 
       this.overlay.requestRedraw();
     };
