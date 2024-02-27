@@ -3,7 +3,7 @@
 import Peer, { DataConnection } from "peerjs";
 // import { code, TranslateCode } from "./code.env";
 
-export function io(uri?: string): Promise<Socket> {
+export function io(): Promise<Socket> {
   return new Promise((resolve, reject) => {
     const peer = new Peer({
       debug: 0,
@@ -138,7 +138,7 @@ export class Server {
     this.socket = _socket;
     // eslint-disable-next-line @typescript-eslint/no-empty-function
     this.whenCloseF = () => {};
-    this.socket.on("open", async (id) => {
+    this.socket.on("open", async () => {
       const f = await idf?.(this);
       f !== undefined ? (this.whenCloseF = f) : "";
     });

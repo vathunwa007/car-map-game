@@ -1,7 +1,6 @@
 import ReactDOM from "react-dom/client";
 
 import { RouterProvider, createBrowserRouter } from "react-router-dom";
-import React from "react";
 import Home from "./pages/Home";
 import Play from "./pages/Play";
 const router = createBrowserRouter([

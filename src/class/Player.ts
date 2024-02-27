@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { Group, Object3DEventMap, Scene, Vector3 } from "three";
+import { Scene, Vector3 } from "three";
 import ThreeJSOverlayView from "../lib/ThreeJSOverlayView";
 import CarMuscle from "./CarMuscle";
 import MapLabel from "../lib/MapLabel";

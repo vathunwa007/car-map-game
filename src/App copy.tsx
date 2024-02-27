@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import { getMapsApiOptions, loadMapsApi } from "./jsm/load-maps-api";
 import ThreeJSOverlayView from "./lib/ThreeJSOverlayView";
 import { CatmullRomCurve3, Vector3 } from "three";
@@ -11,21 +11,18 @@ import { GLTF, GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import "./App.css";
 import Controler from "./components/carSteering/CarSteering";
 import { isHotkeyPressed } from "react-hotkeys-hook";
-import Player from "./class/Player";
 function App() {
   const CAR_FRONT = new Vector3(0, 1, 0);
   const tmpVec3 = new Vector3();
   const maxSpeed = 100;
   let speed = 0;
-  let carWhellRotate = 0;
+  const carWhellRotate = 0;
   const VIEW_PARAMS = {
     center: { lat: 53.554486, lng: 10.007479 },
     zoom: 21,
     heading: 40,
     tilt: 65,
   };
-
-  const ANIMATION_DURATION = 12000;
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const ANIMATION_POINTS = [
@@ -224,7 +221,7 @@ function App() {
           zIndex: 0,
         }}
       ></div>
-      <Controler onWheelRotate={(e) => (carWhellRotate = e)} />
+      <Controler />
     </div>
   );
 }

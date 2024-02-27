@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { Server, Socket, io } from "../server/sockets";
+import { Server } from "../server/sockets";
 
 function Home() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
