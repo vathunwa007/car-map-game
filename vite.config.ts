@@ -19,6 +19,8 @@ export default defineConfig({
       includeAssets: ["**/*"],
     }),
     viteStaticCopy({
+      silent: true,
+      structured: true,
       targets: [
         {
           src: path.resolve(__dirname, "./src/jsm") + "/[!.]*", // 1️⃣
