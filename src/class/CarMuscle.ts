@@ -1,6 +1,7 @@
 import { Group, Object3D, Object3DEventMap } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import Controller from "./Controller";
+import CarGlb from "../assets/muscle_car.glb";
 
 class CarMuscle {
   public carModel!: Group<Object3DEventMap>;
@@ -32,7 +33,7 @@ class CarMuscle {
     const loader = new GLTFLoader();
 
     return new Promise((resolve) => {
-      loader.load("/src/muscle_car.glb", (gltf) => {
+      loader.load(CarGlb, (gltf) => {
         const group = gltf.scene;
         const carModel = group.getObjectByName("Sketchfab_model") || group;
         carModel?.scale.setScalar(1);

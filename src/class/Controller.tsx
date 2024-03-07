@@ -22,7 +22,7 @@ class Controller extends Component {
       if (isHotkeyPressed("right")) {
         this.rotateWheel < 440 && (this.rotateWheel += 55);
       }
-      if (this.CarUser.speed !== 0) {
+      if (this.CarUser.speed > 1) {
         if (!isHotkeyPressed("left") && !isHotkeyPressed("right")) {
           this.rotateWheel > 0
             ? (this.rotateWheel =
@@ -33,6 +33,18 @@ class Controller extends Component {
                 this.rotateWheel + (this.CarUser.speed * 44) / 100 >= 0
                   ? 0
                   : this.rotateWheel + (this.CarUser.speed * 44) / 100);
+        }
+      } else if (this.CarUser.speed < 1) {
+        if (!isHotkeyPressed("left") && !isHotkeyPressed("right")) {
+          this.rotateWheel > 0
+            ? (this.rotateWheel =
+                this.rotateWheel + (this.CarUser.speed * 44) / 100 <= 0
+                  ? 0
+                  : this.rotateWheel + (this.CarUser.speed * 44) / 100)
+            : (this.rotateWheel =
+                this.rotateWheel - (this.CarUser.speed * 44) / 100 >= 0
+                  ? 0
+                  : this.rotateWheel - (this.CarUser.speed * 44) / 100);
         }
       }
       this.rotateWheelValue = (this.rotateWheel * 100) / 440;
@@ -76,7 +88,7 @@ class Controller extends Component {
       this.CarModel?.rotateZ(
         (this.rotateWheelValue *
           this.calculateRadiusValue(
-            this.CarUser.speed,
+            -this.CarUser.speed,
             0.01,
             0.05,
             this.CarUser.maxSpeed
