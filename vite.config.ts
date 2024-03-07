@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { VitePWA } from "vite-plugin-pwa";
+import { viteStaticCopy } from "vite-plugin-static-copy";
+import path from "path";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -15,6 +17,14 @@ export default defineConfig({
         maximumFileSizeToCacheInBytes: 314572800, // 3MB
       },
       includeAssets: ["**/*"],
+    }),
+    viteStaticCopy({
+      targets: [
+        {
+          src: path.resolve(__dirname, "./src/jsm") + "/[!.]*", // 1️⃣
+          dest: "./src/jsm",
+        },
+      ],
     }),
   ],
   assetsInclude: ["**/*.{gltf,glb}"],
