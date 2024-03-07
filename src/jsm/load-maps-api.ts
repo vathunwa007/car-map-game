@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { Loader as MapsApiLoader } from "@googlemaps/js-api-loader";
 
 const LOCAL_STORAGE_API_KEY = "threejs-overlay-view-api-key";
@@ -44,7 +45,7 @@ export async function loadMapsApi(libraries = []) {
   const loader = new MapsApiLoader({
     version: "beta",
     apiKey,
-    libraries,
+    libraries: ["geometry", "places", "visualization"],
   });
 
   const instantMap = await loader.load();

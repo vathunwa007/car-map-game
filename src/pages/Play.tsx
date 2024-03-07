@@ -9,9 +9,10 @@ import { Server, Socket, io } from "../server/sockets";
 
 function Play() {
   const VIEW_PARAMS = {
-    center: { lat: 53.554486, lng: 10.007479 },
-    zoom: 21,
-    heading: 40,
+    // center: { lat: 53.554486, lng: 10.007479 },
+    center: { lat: 13.7640367, lng: 100.5472515 },
+    zoom: 23,
+    heading: 10,
     tilt: 65,
   };
 
@@ -66,7 +67,7 @@ function Play() {
 
       io()
         .then((socket) => {
-          UserPlayer.name = socket.id;
+          UserPlayer.name = socket.id.slice(0, 5);
           console.log("socketClient :>> ", socket);
           socket.on("disconnect", () => {
             console.error("connection got interrupt");
@@ -123,7 +124,7 @@ function Play() {
               const Server = await serv;
               // setIServer(Server);
               console.log("Server :>> ", Server);
-              UserPlayer.name = Server.code;
+              UserPlayer.name = "HostMapPlayer";
               UserPlayer.update();
 
               setInterval(() => {

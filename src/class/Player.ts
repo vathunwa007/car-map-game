@@ -21,9 +21,13 @@ export default class Player {
     this.isControl = main || false;
 
     const overlay = new ThreeJSOverlayView({
-      lat: map.getCenter()?.lat() || 1,
-      lng: map.getCenter()?.lng() || 1,
+      lat: 13.7640367,
+      lng: 100.5472515,
     });
+    // const overlay = new ThreeJSOverlayView({
+    //   lat: map.getCenter()?.lat() || 1,
+    //   lng: map.getCenter()?.lng() || 1,
+    // });
     overlay.setMap(map);
     this.overlay = overlay;
     this.scene = overlay.getScene();
@@ -43,8 +47,9 @@ export default class Player {
     const mapLabel = new MapLabel({
       text: this.name,
       map: this.map,
-      fontSize: 20,
+      fontSize: 15,
       align: "top",
+      fontColor: this.isControl && "#F54",
     });
     this.label = mapLabel;
     const CarUser = new CarMuscle(this.isControl);
@@ -65,9 +70,10 @@ export default class Player {
       const coordinates = this.overlay.vector3ToLatLngAlt(
         CarUser.carModel?.position || new Vector3()
       );
+
       const zoomSpeed = Math.max(
-        20,
-        Math.min(21 - (CarUser.speed / 100) * (21 - 20), 21)
+        19.5,
+        Math.min(21 - (CarUser.speed / 100) * (21 - 19.5), 21)
       );
       mapLabel.setPosition(coordinates);
       if (this.isControl) {
@@ -76,7 +82,6 @@ export default class Player {
           zoom: zoomSpeed,
         });
       }
-
       this.overlay.requestRedraw();
     };
   }
